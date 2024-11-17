@@ -27,6 +27,7 @@ class ProgramaReporteInscripciones:
             elif opcion == "4":
                 formato = input("Seleccione el formato (JSON/CSV): ").lower()
                 self.consolidado.exportarDatos(formato)
+                print(f"Datos exportados exitosamente en formato {formato}.")  # Debug
             elif opcion == "5":
                 print("Saliendo del programa.")
                 break

@@ -1,6 +1,8 @@
+import csv
+import os
 import sqlite3
-from estudiante import Estudiante
 from lector_archivo_texto import LectorArchivoTexto
+import json
 
 
 class ConsolidadoInscripciones:
@@ -30,13 +32,13 @@ class ConsolidadoInscripciones:
                     INSERT OR IGNORE INTO Estudiantes (cedula, nombre)
                     VALUES (?, ?)
                 ''', (cedula, nombre))
-                
+
                 # Insertar o ignorar materia
                 cursor.execute('''
                     INSERT OR IGNORE INTO Materias (codigo, nombre)
                     VALUES (?, ?)
                 ''', (codigo, nombre_materia))
-                
+
                 # Insertar inscripción
                 cursor.execute('''
                     INSERT INTO Inscripciones (cedula, codigo)
@@ -56,7 +58,7 @@ class ConsolidadoInscripciones:
                 ORDER BY e.cedula
             ''')
             estudiantes = cursor.fetchall()
-            
+
             for cedula, nombre_estudiante, codigo_materia, nombre_materia in estudiantes:
                 print(f"Cédula: {cedula}, Nombre: {nombre_estudiante}, "
                       f"Materia: {codigo_materia} - {nombre_materia}")
@@ -71,7 +73,7 @@ class ConsolidadoInscripciones:
                 WHERE i.codigo = ?
             ''', (codigo_materia,))
             estudiantes = cursor.fetchall()
-            
+
             if estudiantes:
                 print(f"Estudiantes inscritos en la materia {codigo_materia}:")
                 for cedula, nombre in estudiantes:
@@ -80,5 +82,57 @@ class ConsolidadoInscripciones:
                 print(f"No se encontraron estudiantes inscritos en la materia {codigo_materia}")
 
     def exportarDatos(self, formato):
-        # Implementar según el formato deseado (ej. CSV, JSON)
-        pass
+        """
+        Exporta los datos a un archivo JSON o CSV dentro de la carpeta 'exportados'.
+        :param formato: El formato al que exportar ('json' o 'csv').
+        """
+        with self._connect_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT e.cedula, e.nombre, m.codigo, m.nombre
+                FROM Estudiantes e
+                JOIN Inscripciones i ON e.cedula = i.cedula
+                JOIN Materias m ON i.codigo = m.codigo
+                ORDER BY e.cedula
+            ''')
+            datos = cursor.fetchall()
+
+            # Asegurarse de que la carpeta 'exportados' exista
+            export_folder = 'exportados'
+            os.makedirs(export_folder, exist_ok=True)
+
+            if formato == 'json':
+                self._exportar_json(datos, export_folder)
+            elif formato == 'csv':
+                self._exportar_csv(datos, export_folder)
+            else:
+                print("Formato no reconocido. Use 'json' o 'csv'.")
+
+    def _exportar_json(self, datos, folder):
+        """Exporta los datos a un archivo JSON en la carpeta especificada."""
+        estudiantes = []
+        for cedula, nombre_estudiante, codigo_materia, nombre_materia in datos:
+            estudiantes.append({
+                "cedula": cedula,
+                "nombre": nombre_estudiante,
+                "codigo_materia": codigo_materia,
+                "nombre_materia": nombre_materia
+            })
+
+        file_path = os.path.join(folder, 'inscripciones.json')
+        with open(file_path, 'w', encoding='utf-8') as archivo_json:
+            json.dump(estudiantes, archivo_json, ensure_ascii=False, indent=4)
+
+        print(f"Datos exportados a {file_path}")
+
+    def _exportar_csv(self, datos, folder):
+        """Exporta los datos a un archivo CSV en la carpeta especificada."""
+        file_path = os.path.join(folder, 'inscripciones.csv')
+        with open(file_path, 'w', encoding='utf-8', newline='') as archivo_csv:
+            writer = csv.writer(archivo_csv)
+            # Escribir encabezados
+            writer.writerow(["Cédula", "Nombre Estudiante", "Código Materia", "Nombre Materia"])
+            # Escribir filas
+            writer.writerows(datos)
+
+        print(f"Datos exportados a {file_path}")
