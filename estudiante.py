@@ -7,10 +7,13 @@ class Estudiante:
         self.nombre = nombre
         self.materias = []  # Lista de objetos Materia
 
-    def adicionarMateria(self, codigo: str, nombre: str) -> None:
-        """Agrega una materia a la lista del estudiante."""
-        pass
+    """Agrega una materia a la lista del estudiante."""
+
+    def adicionarMateria(self, codigo, nombre):
+        self.materias.append(Materia(codigo, nombre))
+
+    """Representación textual del estudiante."""
 
     def __str__(self) -> str:
-        """Representación textual del estudiante."""
-        return f"Estudiante: {self.nombre} (Cédula: {self.cedula})"
+        materias_str = ", ".join(str(materia) for materia in self.materias)
+        return f"Estudiante: {self.nombre}, Cédula: {self.cedula}, Materias:[ {materias_str} ]"

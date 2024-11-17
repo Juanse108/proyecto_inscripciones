@@ -3,30 +3,33 @@ from lector_archivo_texto import LectorArchivoTexto
 
 
 class ConsolidadoInscripciones:
-    class ConsolidadoInscripciones:
-        def __init__(self):
-            self.estudiantes = {}  # Diccionario con cédula como clave y objeto Estudiante como valor
+    def __init__(self):
+        self.estudiantes = {}  # Diccionario con cédula como clave y objeto Estudiante como valor
 
-        def consolidarArchivo(self, ruta: str) -> None:
-            """Procesa un archivo de texto y actualiza el consolidado de inscripciones."""
-            pass
+    """Procesa un archivo de texto y actualiza el consolidado de inscripciones."""
 
-        def procesarLinea(self, linea: str) -> None:
-            """Procesa una línea de texto y actualiza el consolidado."""
-            pass
+    def consolidarArchivo(self, ruta):
+        lector = LectorArchivoTexto(ruta)
+        lineas = lector.obtenerLineas()
+        for linea in lineas:
+            self.procesarLinea(linea.strip())
 
-        def buscarEstudiante(self, cedula: str):
-            """Busca y retorna un estudiante por su cédula."""
-            return self.estudiantes.get(cedula, None)
+    def procesarLinea(self, linea):
+        partes = linea.split(',')
+        if len(partes) == 4:
+            cedula, nombre, codigo, nombre_materia = partes
+            estudiante = self.estudiantes.get(cedula, Estudiante(cedula, nombre))
+            estudiante.adicionarMateria(codigo, nombre_materia)
+            self.estudiantes[cedula] = estudiante
+        else:
+            print(f"Error en el formato de línea: {linea}")
 
-        def mostrarEstudiantes(self) -> None:
-            """Itera por los estudiantes y muestra sus datos."""
-            pass
+    def mostrarEstudiantes(self):
+        for estudiante in self.estudiantes.values():
+            print(estudiante)
 
-        def filtrarPorMateria(self, codigo: str) -> list:
-            """Retorna una lista de estudiantes inscritos en una materia específica."""
-            pass
+    def filtrarPorMateria(self, codigo_materia):
+        pass
 
-        def exportarDatos(self, formato: str) -> None:
-            """Exporta los datos procesados en JSON o CSV."""
-            pass
+    def exportarDatos(self, formato):
+        pass
