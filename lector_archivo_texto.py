@@ -5,9 +5,11 @@ class LectorArchivoTexto:
     """Lee el archivo y retorna las líneas como lista de strings."""
     def obtenerLineas(self):
         try:
-            with open(self.nombreArchivo, "r",encoding='utf-8') as archivo:
+            with open(self.nombreArchivo, "r", encoding='utf-8') as archivo:
                 return archivo.readlines()
         except FileNotFoundError:
             print(f"Error: El archivo {self.nombreArchivo} no se encontró.")
             return []
-
+        except Exception as e:
+            print(f"Error inesperado al leer el archivo: {e}")
+            return []
